@@ -35,7 +35,7 @@ def calculate_profit(i):
     return
 
 
-analyst = StockData('goog.csv')
+analyst = StockData('table.csv')
 closing_value = analyst.getClosingValue()
 rsi_14_day = analyst.getRSIArray()
 sma_50_day = analyst.getSMA_50_day()
@@ -46,6 +46,8 @@ min_rsi = analyst.getMinRSI()
 avg_rsi = analyst.getAverageRSI()
 
 no_of_entries = analyst.getNumberOfEntries()
+
+print max_rsi, min_rsi, avg_rsi
 
 for j in range(min_rsi, avg_rsi):
 # for j in range(33, 35):
@@ -71,4 +73,4 @@ max_profit_index = profits_list.index(max(profits_list))
 # print profits_list
 print ("Total profit for %s stocks bought and %s sold is %s %s " % (total_stocks_bought_list[max_profit_index], total_stocks_sold_list[max_profit_index], max_profit, max_profit_index))
         # print("Total profit for lower %s and upper %s is %s  " % (j, k, settled_profit))
-        # print total_sold, total_bought, j
+        # print total_sold, total_bought, j'''
