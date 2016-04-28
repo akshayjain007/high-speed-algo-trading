@@ -55,7 +55,6 @@ pprint("Creating a %d x %d processor grid..." % (mpi_rows, mpi_cols) )
 ccomm = comm.Create_cart( (mpi_rows, mpi_cols), periods=(True, True), reorder=True)
 my_mpi_row, my_mpi_col = ccomm.Get_coords( ccomm.rank ) 
 
-#print my_mpi_row, my_mpi_col
 comm.barrier()
 
 def init():
@@ -89,7 +88,6 @@ def calculate_profit(upper_bound_rsi, lower_bound_rsi):
             # print "No action"
     diff_num = total_sold - total_bought
     settled_profit = profit - diff_num*closing_value[0]
-    #print settled_profit
     return settled_profit
 
 
@@ -108,11 +106,9 @@ for r in range(row_segment):
         #print profit_matrix[current_row][current_col]
 
 comm.Barrier()
-#profit_matrix_all = comm.gather(profit_matrix, root=0)
 comm.Reduce(profit_matrix, profit_matrix_all, op=MPI.SUM, root=0)
+
 comm.Barrier()
-pprint("Prifit all")
-print(profit_matrix_all)
 t_diff = MPI.Wtime() - t_start    ### Stop stopwatch ###
 
 comm.Barrier()
@@ -127,14 +123,12 @@ if (comm.rank == 0):
                 max_profit = compare
                 x_index = i
                 y_index = j
-    print "Min and Max", min_rsi, max_rsi
-    print max_profit, (x_index+min_rsi), (max_rsi - y_index)
-    print "__19 and 55 wala__", profit_matrix_all[0][37]
-pprint("============================================================================")
-
+    print "Profit --> ", max_profit
+    print "Lower Bound --> ", (x_index+min_rsi)
+    print "Upper Bound --> ", (max_rsi - y_index)
 
 comm.Barrier()
-
+pprint("============================================================================")
 pprint("time taken by parallel part of code: %5.2fs" % t_diff)
 pprint("============================================================================")
 
