@@ -1,69 +1,15 @@
 import csv
 import pandas as pd
+from StockData import StockData
 
-profit = 0
-total_sold = 0
-total_bought = 0
-stocks_left = 0
 upper_bound_rsi = 0
 lower_bound_rsi = 0
-range_for_bound = 15
 
-alphabet_csv = pd.read_csv('goog.csv')
-closing_value = alphabet_csv.Close
-volume_of_shares = alphabet_csv.Volume
-max_volume = max(volume_of_shares)
-min_volume = min(volume_of_shares)
+profits_list = []
+total_stocks_sold_list = []
+total_stocks_bought_list = []
 
-rsi_14_day = alphabet_csv.RSI_day_14
-max_rsi = max(rsi_14_day)
-min_rsi = min(rsi_14_day)
-avg_rsi = (min_rsi+max_rsi)/2
-
-sma_50_day = alphabet_csv.SMA_50
-sma_25_day = alphabet_csv.SMA_25
-
-
-class AnalystClass:
-    
-    def __init__(self):
-        #alphabet_csv = pd.read_csv(filename)
-        alphabet_csv = pd.read_csv('goog.csv')
-        self.csvFile = alphabet_csv
-        self.closing_value = alphabet_csv.Close
-        self.volume_of_shares = alphabet_csv.Volume
-        
-        self.max_volume = max(self.volume_of_shares)
-        self.min_volume = min(self.volume_of_shares)
-
-        self.rsi_14_day = alphabet_csv.RSI_day_14
-        max_rsi = max(self.rsi_14_day)
-        min_rsi = min(self.rsi_14_day)
-        self.avg_rsi = (min_rsi+max_rsi)/2
-
-        self.sma_50_day = alphabet_csv.SMA_50
-        self.sma_25_day = alphabet_csv.SMA_25
-
-    def getRSIArray(self):
-        return self.rsi_14_day
-
-    def getSMA_50_day(self):
-        return self.sma_50_day
-
-    def getSMA_25_day(self):
-        return self.sma_25_day
-    
-    def getVolumeOfShares(self):
-        return self.volume_of_shares
-        
-    def getClosingValue(self):
-        return self.closing_value
-
-    def getNumberOfEntries(self):
-        no_of_entries = len(self.volume_of_shares)-50
-        return no_of_entries
-
-
+#init basic variabls for each iteration
 def init():
     global profit, total_bought, total_sold, stocks_left
     profit = 0
@@ -72,6 +18,7 @@ def init():
     stocks_left = 0
     return
 
+#function to calculate profit
 def calculate_profit(i):
     global profit, total_bought, total_sold, stocks_left
     if (rsi_14_day[i]> upper_bound_rsi and sma_25_day[i]<sma_50_day[i]):
@@ -85,12 +32,26 @@ def calculate_profit(i):
             total_sold = total_sold + 1
             stocks_left -= 1
         # print "Selling a share"
-    # else:
-        # print "No action"
     return
 
-for j in range(int(min_rsi),int(avg_rsi)):
-    for k in range(int(avg_rsi), int(max_rsi)):
+
+analyst = StockData('goog.csv')
+closing_value = analyst.getClosingValue()
+rsi_14_day = analyst.getRSIArray()
+sma_50_day = analyst.getSMA_50_day()
+sma_25_day = analyst.getSMA_25_day()
+
+max_rsi = analyst.getMaxRSI()
+min_rsi = analyst.getMinRSI()
+avg_rsi = analyst.getAverageRSI()
+
+no_of_entries = analyst.getNumberOfEntries()
+
+
+for j in range(min_rsi, max_rsi):
+# for j in range(33, 35):
+    # for k in range(60, 65):
+    for k in range(min_rsi, max_rsi):
         init()
         upper_bound_rsi = k
         lower_bound_rsi = j
@@ -98,6 +59,17 @@ for j in range(int(min_rsi),int(avg_rsi)):
             calculate_profit(i)
 
         diff_num = total_sold - total_bought
+        # print diff_num
         settled_profit = profit - diff_num*closing_value[0]
+
+        profits_list.append(settled_profit)
+        total_stocks_bought_list.append(total_bought)
+        total_stocks_sold_list.append(total_sold)
+
+max_profit = max(profits_list)
+max_profit_index = profits_list.index(max(profits_list))
+
+print profits_list
+print ("Total profit for %s stocks bought and %s sold is %s %s " % (total_stocks_bought_list[max_profit_index], total_stocks_sold_list[max_profit_index], max_profit, max_profit_index))
         # print("Total profit for lower %s and upper %s is %s  " % (j, k, settled_profit))
         # print total_sold, total_bought, j

@@ -13,9 +13,9 @@ class StockData:
         self.min_volume = min(self.volume_of_shares)
 
         self.rsi_14_day = alphabet_csv.RSI_day_14
-        max_rsi = max(self.rsi_14_day)
-        min_rsi = min(self.rsi_14_day)
-        self.avg_rsi = (min_rsi+max_rsi)/2
+        self.max_rsi = max(self.rsi_14_day)
+        self.min_rsi = min(self.rsi_14_day)
+        self.avg_rsi = (self.min_rsi+self.max_rsi)/2
 
         self.sma_50_day = alphabet_csv.SMA_50
         self.sma_25_day = alphabet_csv.SMA_25
@@ -39,3 +39,11 @@ class StockData:
         no_of_entries = len(self.volume_of_shares)-50
         return no_of_entries
         
+    def getMaxRSI(self):
+        return int(self.max_rsi)
+
+    def getMinRSI(self):
+        return int(self.min_rsi)
+
+    def getAverageRSI(self):
+        return int(self.avg_rsi)
