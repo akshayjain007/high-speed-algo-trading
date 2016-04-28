@@ -3,31 +3,19 @@ from pyopencl import array
 import numpy
 import pandas as pd
 import os
+from StockData import StockData
 
- 
 if __name__ == "__main__":
     #a array of values we'll pass to the kernel to perform computations to
 
     os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
     
-    profit = 0
-    total_sold = 0
-    total_bought = 0
-    stocks_left = 0
-    alphabet_csv = pd.read_csv('goog.csv')
-    closing_value = numpy.array(alphabet_csv.Close,dtype=numpy.float32)
-    volume_of_shares = alphabet_csv.Volume
-    max_volume = max(volume_of_shares)
-    min_volume = min(volume_of_shares)
-
-    rsi_14_day = numpy.array(alphabet_csv.RSI_day_14,dtype=numpy.float32)
-    max_rsi = max(rsi_14_day)
-    min_rsi = min(rsi_14_day)
-    upper_bound_rsi = max_rsi - 20
-    lower_bound_rsi = min_rsi + 20
-
-    sam_50_day = numpy.array(alphabet_csv.SMA_50, dtype=numpy.float32)
-    sam_25_day = numpy.array(alphabet_csv.SMA_25, dtype=numpy.float32)
+    analyst = StockData('goog.csv')
+    closing_value = numpy.array(analyst.getClosingValue(),dtype=numpy.float32)
+    rsi_14_day = numpy.array(analyst.getRSIArray(),dtype=numpy.float32)
+    sam_50_day = numpy.array(analyst.getSMA_50_day(), dtype=numpy.float32)
+    sam_25_day = numpy.array(analyst.getSMA_25_day(), dtype=numpy.float32)
+    
     a = range(35*36)
     
     ## Step #1. Obtain an OpenCL platform.
@@ -115,6 +103,14 @@ if __name__ == "__main__":
     ## PyOpenCL performs this step for you, and therefore,
     ## you don't need to worry about cleanup code
     for i in range(35*36):
-        pass
-        #print str(19 + i%35)+","+str(55 + i/35) + "->" + str(result[i])
+        print str(19 + i%35)+","+str(55 + i/35) + "->" + str(result[i])
+        
+    
+    
+    
+    
+    
+    
+    
+    
     
