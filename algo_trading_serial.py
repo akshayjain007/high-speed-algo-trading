@@ -47,11 +47,10 @@ avg_rsi = analyst.getAverageRSI()
 
 no_of_entries = analyst.getNumberOfEntries()
 
-
-for j in range(min_rsi, max_rsi):
+for j in range(min_rsi, avg_rsi):
 # for j in range(33, 35):
     # for k in range(60, 65):
-    for k in range(min_rsi, max_rsi):
+    for k in range(avg_rsi, max_rsi):
         init()
         upper_bound_rsi = k
         lower_bound_rsi = j
@@ -61,7 +60,7 @@ for j in range(min_rsi, max_rsi):
         diff_num = total_sold - total_bought
         # print diff_num
         settled_profit = profit - diff_num*closing_value[0]
-
+        print settled_profit
         profits_list.append(settled_profit)
         total_stocks_bought_list.append(total_bought)
         total_stocks_sold_list.append(total_sold)
@@ -69,7 +68,7 @@ for j in range(min_rsi, max_rsi):
 max_profit = max(profits_list)
 max_profit_index = profits_list.index(max(profits_list))
 
-print profits_list
+# print profits_list
 print ("Total profit for %s stocks bought and %s sold is %s %s " % (total_stocks_bought_list[max_profit_index], total_stocks_sold_list[max_profit_index], max_profit, max_profit_index))
         # print("Total profit for lower %s and upper %s is %s  " % (j, k, settled_profit))
         # print total_sold, total_bought, j
