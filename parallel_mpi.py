@@ -1,7 +1,17 @@
 import csv
 import pandas as pd
 from mpi4py import MPI
-import numpy as np 
+import numpy as np
+from StockData import StockData
+
+# Initializations and preliminaries
+comm = MPI.COMM_WORLD   # get MPI communicator object
+size = comm.size        # total number of processes
+rank = comm.rank        # rank of this process
+status = MPI.Status()   # get MPI status object
+comm.Barrier()                    ### Start stopwatch ###
+t_start = MPI.Wtime()
+
 
 profit = 0
 total_sold = 0
@@ -11,35 +21,26 @@ upper_bound_rsi = 0
 lower_bound_rsi = 0
 range_for_bound = 15
 
-alphabet_csv = pd.read_csv('goog.csv')
-closing_value = alphabet_csv.Close
-volume_of_shares = alphabet_csv.Volume
-max_volume = max(volume_of_shares)
-min_volume = min(volume_of_shares)
-
-rsi_14_day = alphabet_csv.RSI_day_14
-max_rsi = int(max(rsi_14_day))
-min_rsi = int(min(rsi_14_day))
-
-mid_rsi = int((max_rsi + min_rsi) / 2)
-lower_count = mid_rsi - min_rsi + 1
-upper_count = max_rsi - mid_rsi + 1
-
-sma_50_day = alphabet_csv.SMA_50
-sma_25_day = alphabet_csv.SMA_25
-
-profit_matrix = np.zeros(shape=(lower_count, upper_count)).astype(np.float32)
-profit_matrix_all = np.zeros(shape=(lower_count, upper_count)).astype(np.float32)
-
 def pprint(string="", end="\n", comm=MPI.COMM_WORLD):
     if comm.rank == 0:
         print string
 
-# Initializations and preliminaries
-comm = MPI.COMM_WORLD   # get MPI communicator object
-size = comm.size        # total number of processes
-rank = comm.rank        # rank of this process
-status = MPI.Status()   # get MPI status object
+analyst = StockData('goog.csv')
+min_rsi = analyst.getMinRSI()
+max_rsi = analyst.getMaxRSI()
+mid_rsi = analyst.getAverageRSI()
+closing_value = analyst.getClosingValue()
+sma_50_day = analyst.getSMA_50_day()
+sma_25_day = analyst.getSMA_25_day()
+volume_of_shares = analyst.getVolumeOfShares()
+rsi_14_day = analyst.getRSIArray()
+
+lower_count = mid_rsi - min_rsi + 1
+upper_count = max_rsi - mid_rsi + 1
+
+profit_matrix = np.zeros(shape=(lower_count, upper_count)).astype(np.float32)
+profit_matrix_all = np.zeros(shape=(lower_count, upper_count)).astype(np.float32)
+
 
 mpi_rows = int(np.floor(np.sqrt(comm.size)))
 mpi_cols = comm.size / mpi_rows
@@ -91,9 +92,6 @@ def calculate_profit(upper_bound_rsi, lower_bound_rsi):
     return settled_profit
 
 
-comm.Barrier()                    ### Start stopwatch ###
-t_start = MPI.Wtime()
-
 row_offset = row_segment * my_mpi_row
 col_offset = col_segment * my_mpi_col
 
@@ -103,13 +101,9 @@ for r in range(row_segment):
         current_col = c + col_offset
         temp = calculate_profit((max_rsi - current_col), (current_row + min_rsi))
         profit_matrix[current_row][current_col] = temp
-        #print profit_matrix[current_row][current_col]
 
 comm.Barrier()
 comm.Reduce(profit_matrix, profit_matrix_all, op=MPI.SUM, root=0)
-
-comm.Barrier()
-t_diff = MPI.Wtime() - t_start    ### Stop stopwatch ###
 
 comm.Barrier()
 if (comm.rank == 0):
@@ -123,11 +117,13 @@ if (comm.rank == 0):
                 max_profit = compare
                 x_index = i
                 y_index = j
+
     print "Profit --> ", max_profit
     print "Lower Bound --> ", (x_index+min_rsi)
     print "Upper Bound --> ", (max_rsi - y_index)
 
 comm.Barrier()
+t_diff = MPI.Wtime() - t_start    ### Stop stopwatch ###
 pprint("============================================================================")
 pprint("time taken by parallel part of code: %5.2fs" % t_diff)
 pprint("============================================================================")
