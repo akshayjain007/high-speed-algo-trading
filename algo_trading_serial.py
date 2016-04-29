@@ -25,13 +25,13 @@ def calculate_profit(i):
         profit = profit - closing_value[i]
         total_bought = total_bought + 1
         stocks_left = stocks_left + 1
-        # print "Buying a volume_of_shares"
+        #print "Day %s Buying a volume_of_shares %s %s" % (i,lower_bound_rsi,upper_bound_rsi)
     elif (rsi_14_day[i]<lower_bound_rsi and sma_25_day[i]>sma_50_day[i]):
         if stocks_left > 0:
             profit = profit + closing_value[i]
             total_sold = total_sold + 1
             stocks_left -= 1
-        # print "Selling a share"
+        #print "Day %s Selling a volume_of_shares %s %s" % (i,lower_bound_rsi,upper_bound_rsi)
     return
 
 
@@ -62,7 +62,7 @@ for j in range(min_rsi, avg_rsi):
         diff_num = total_sold - total_bought
         # print diff_num
         settled_profit = profit - diff_num*closing_value[0]
-        print settled_profit
+        #print settled_profit
         profits_list.append(settled_profit)
         total_stocks_bought_list.append(total_bought)
         total_stocks_sold_list.append(total_sold)
@@ -71,6 +71,6 @@ max_profit = max(profits_list)
 max_profit_index = profits_list.index(max(profits_list))
 
 # print profits_list
-print ("Total profit for %s stocks bought and %s sold is %s %s " % (total_stocks_bought_list[max_profit_index], total_stocks_sold_list[max_profit_index], max_profit, max_profit_index))
+print ("Total profit for %s stocks bought and %s sold is %s " % (total_stocks_bought_list[max_profit_index], total_stocks_sold_list[max_profit_index], max_profit))
         # print("Total profit for lower %s and upper %s is %s  " % (j, k, settled_profit))
         # print total_sold, total_bought, j'''
